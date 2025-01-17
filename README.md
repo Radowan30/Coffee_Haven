@@ -29,7 +29,7 @@
 - Spring Security
 - Spring Data JPA 
 - MySQL Database
-- Groq AI API
+- Spring AI (with Groq AI API)
 
 ### Frontend
 - Thymeleaf
