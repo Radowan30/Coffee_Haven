@@ -74,6 +74,6 @@ mvn spring-boot:run
 ✨ Contributors
 Java Brewers Team (Radowan, Ahmed, Rafi, Mouaz) - Studnts of UTM KL
 
-<p align="center">Made with ❤️ by Java Brewers</p> ```
+<p align="center">Made with ❤️ by Java Brewers</p>
 
 
