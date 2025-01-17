@@ -18,7 +18,7 @@
 - Product catalog maintenance
 
 
-**Note:** The Shopping Cart and My Orders functionalities for the Customer's view has errors in them currently.
+**Note:** The Shopping Cart, My Orders functionalities for the Customer's sub-system, and image rendering for the Admin's sub-system has errors in them currently.
 
 
 ## 🛠️ Tech Stack
@@ -54,7 +54,7 @@ git clone https://github.com/yourusername/coffee-haven.git
 
 2. Configure database
 
-Make a MySQL database called 'coffeehavenDB'.
+Make a MySQL database called 'coffeehavenDB'. In the 'application.properties' file add the following lines of code:
 ```bash
 # src/main/resources/application.properties
 spring.datasource.url=jdbc:mysql://localhost:3306/coffeehavenDB
