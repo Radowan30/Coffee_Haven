@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --brown-100: #F5E6D3;
+            --brown-200: #E6D0B8;
+            --brown-300: #D7BA9C;
+            --brown-400: #C8A581;
+            --brown-500: #B98F65;
+            --brown-600: #8C6B4F;
+        }
+        body {
+            background-color: var(--brown-100);
+            color: #4A3728;
+        }
+        .navbar {
+            background-color: var(--brown-500);
+        }
+        .card {
+            background-color: white;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-primary {
+            background-color: var(--brown-400);
+            border-color: var(--brown-400);
+        }
+        .btn-primary:hover {
+            background-color: var(--brown-500);
+            border-color: var(--brown-500);
+        }
+        .btn-outline-primary {
+            color: var(--brown-600);
+            border-color: var(--brown-600);
+        }
+        .btn-outline-primary:hover {
+            background-color: var(--brown-600);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">☕ Coffee Haven</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/user}">Continue Shopping</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/cart}">Cart</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/orders/my_orders}">My Orders</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/login}">Log Out</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h1 class="mb-4">Your Shopping Cart</h1>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <table class="table" id="cartTable">
+                        <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${cartItems}">
+                            <td th:text="${item.productName}"></td>
+                            <td th:text="${item.price}"></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary" th:onclick="'updateQuantity(' + ${item.id} + ',' + (${item.quantity} - 1) + ')'">-</button>
+                                <span class="mx-2" th:text="${item.quantity}"></span>
+                                <button class="btn btn-sm btn-outline-secondary" th:onclick="'updateQuantity(' + ${item.id} + ',' + (${item.quantity} + 1) + ')'">+</button>
+                            </td>
+                            <td th:text="${item.totalPrice}"></td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" th:onclick="'removeItem(' + ${item.id} + ')'">Remove</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Order Summary</h5>
+                    <p>Subtotal: $<span th:text="${subtotal}"></span></p>
+                    <p>Tax (10%): $<span th:text="${tax}"></span></p>
+                    <h4>Total: $<span th:text="${total}"></span></h4>
+                    <button class="btn btn-primary w-100 mt-3" id="checkout_button" onclick="checkout()">Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function fetchCartItems() {
+        fetch('/api/cart')
+            .then(response => response.json())
+            .then(data => {
+                const cartTableBody = document.getElementById('cartTable').getElementsByTagName('tbody')[0];
+                cartTableBody.innerHTML = '';
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.productName}</td>
+                        <td>${item.price}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                            <span class="mx-2">${item.quantity}</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                        </td>
+                        <td>${item.totalPrice}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger" onclick="removeItem(${item.id})">Remove</button>
+                        </td>
+                    `;
+                    cartTableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error fetching cart items:', error));
+    }
+
+    function updateQuantity(itemId, newQuantity) {
+        fetch('/api/cart/update', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: itemId, quantity: newQuantity }),
+        })
+            .then(response => response.json())
+            .then(data => fetchCartItems())
+            .catch(error => console.error('Error updating quantity:', error));
+    }
+
+    function removeItem(itemId) {
+        fetch(`/api/cart/${itemId}`, {
+            method: 'DELETE',
+        })
+            .then(response => {
+                if (response.ok) {
+                    fetchCartItems();
+                } else {
+                    throw new Error('Failed to remove item');
+                }
+            })
+            .catch(error => console.error('Error removing item:', error));
+    }
+
+    function checkout() {
+        // Implement checkout functionality
+        console.log('Proceed to checkout');
+    }
+
+    // Fetch cart items on page load
+    fetchCartItems();
+</script>
+</body>
+</html>

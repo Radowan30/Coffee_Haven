@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Haven - Orders List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --brown-100: #F5E6D3;
+            --brown-200: #E6D0B8;
+            --brown-300: #D7BA9C;
+            --brown-400: #C8A581;
+            --brown-500: #B98F65;
+            --brown-600: #8C6B4F;
+        }
+        body {
+            background-color: var(--brown-100);
+            color: #4A3728;
+        }
+        .navbar {
+            background-color: var(--brown-500);
+        }
+        .card {
+            background-color: white;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-primary {
+            background-color: var(--brown-400);
+            border-color: var(--brown-400);
+        }
+        .btn-primary:hover {
+            background-color: var(--brown-500);
+            border-color: var(--brown-500);
+        }
+        .table {
+            background-color: white;
+        }
+        .status-pending {
+            color: #ffc107;
+        }
+        .status-processing {
+            color: #17a2b8;
+        }
+        .status-shipped {
+            color: #28a745;
+        }
+        .status-delivered {
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/orders}">☕ Coffee Haven - Orders List</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin}">Inventory</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/login}">Log Out</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h1 class="mb-4">Orders List</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search orders...">
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" id="statusFilter">
+                        <option value="">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" id="sortOrder">
+                        <option value="dateDesc">Date (Newest First)</option>
+                        <option value="dateAsc">Date (Oldest First)</option>
+                        <option value="totalDesc">Total (Highest First)</option>
+                        <option value="totalAsc">Total (Lowest First)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                    <!-- Orders will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailsTitle">Order Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="orderDetailsBody">
+                <!-- Order details will be dynamically inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="updateStatusBtn">Update Status</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let orders = [];
+
+    function fetchOrders() {
+        fetch('/orders/api')
+            .then(response => response.json())
+            .then(data => {
+                orders = data;
+                renderOrders();
+            })
+            .catch(error => {
+                console.error('Error fetching orders:', error);
+            });
+    }
+
+    function renderOrders() {
+        const ordersTableBody = document.getElementById('ordersTableBody');
+        ordersTableBody.innerHTML = '';
+        orders.forEach(order => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${new Date(order.date).toLocaleDateString()}</td>
+                    <td>${order.customer}</td>
+                    <td>$${order.total.toFixed(2)}</td>
+                    <td><span class="status-${order.status.toLowerCase()}">${order.status}</span></td>
+                    <td><button class="btn btn-sm btn-primary" onclick="showOrderDetails(${order.id})">View Details</button></td>
+                `;
+            ordersTableBody.appendChild(row);
+        });
+    }
+
+    function showOrderDetails(orderId) {
+        const order = orders.find(o => o.id === orderId);
+        if (order) {
+            document.getElementById('orderDetailsTitle').textContent = `Order #${order.id} Details`;
+            document.getElementById('orderDetailsBody').innerHTML = `
+                    <p><strong>Date:</strong> ${new Date(order.date).toLocaleDateString()}</p>
+                    <p><strong>Customer:</strong> ${order.customer}</p>
+                    <p><strong>Status:</strong>
+                        <select id="statusSelect" class="form-select form-select-sm d-inline-block w-auto">
+                            <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                            <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                            <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                            <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                        </select>
+                    </p>
+                    <h4>Total: $${order.total.toFixed(2)}</h4>
+                `;
+
+            document.getElementById('updateStatusBtn').onclick = () => updateOrderStatus(orderId);
+
+            new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
+        }
+    }
+
+    function updateOrderStatus(orderId) {
+        const newStatus = document.getElementById('statusSelect').value;
+        fetch(`/orders/api/${orderId}/status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status: newStatus }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                const orderIndex = orders.findIndex(o => o.id === orderId);
+                if (orderIndex !== -1) {
+                    orders[orderIndex] = data;
+                    renderOrders();
+                }
+                bootstrap.Modal.getInstance(document.getElementById('orderDetailsModal')).hide();
+            })
+            .catch(error => {
+                console.error('Error updating order status:', error);
+                alert('Failed to update order status. Please try again.');
+            });
+    }
+
+    // Search, filter, and sort functionality
+    document.getElementById('searchInput').addEventListener('input', filterOrders);
+    document.getElementById('statusFilter').addEventListener('change', filterOrders);
+    document.getElementById('sortOrder').addEventListener('change', sortOrders);
+
+    function filterOrders() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const filteredOrders = orders.filter(order =>
+            (order.customer.toLowerCase().includes(searchTerm) || order.id.toString().includes(searchTerm)) &&
+            (statusFilter === '' || order.status === statusFilter)
+        );
+        renderFilteredOrders(filteredOrders);
+    }
+
+    function sortOrders() {
+        const sortBy = document.getElementById('sortOrder').value;
+        let sortedOrders = [...orders];
+
+        switch (sortBy) {
+            case 'dateDesc':
+                sortedOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+                break;
+            case 'dateAsc':
+                sortedOrders.sort((a, b) => new Date(a.date) - new Date(b.date));
+                break;
+            case 'totalDesc':
+                sortedOrders.sort((a, b) => b.total - a.total);
+                break;
+            case 'totalAsc':
+                sortedOrders.sort((a, b) => a.total - b.total);
+                break;
+        }
+
+        renderFilteredOrders(sortedOrders);
+    }
+
+    function renderFilteredOrders(filteredOrders) {
+        const ordersTableBody = document.getElementById('ordersTableBody');
+        ordersTableBody.innerHTML = '';
+        filteredOrders.forEach(order => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${new Date(order.date).toLocaleDateString()}</td>
+                    <td>${order.customer}</td>
+                    <td>$${order.total.toFixed(2)}</td>
+                    <td><span class="status-${order.status.toLowerCase()}">${order.status}</span></td>
+                    <td><button class="btn btn-sm btn-primary" onclick="showOrderDetails(${order.id})">View Details</button></td>
+                `;
+            ordersTableBody.appendChild(row);
+        });
+    }
+
+    // Initial render
+    fetchOrders();
+</script>
+</body>
+</html>

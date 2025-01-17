@@ -1,0 +1,118 @@
+:root {
+    --brown-100: #F5E6D3;
+    --brown-200: #E6D0B8;
+    --brown-300: #D7BA9C;
+    --brown-400: #C8A581;
+    --brown-500: #B98F65;
+    --brown-600: #8C6B4F;
+    --highlight-color: #D7BA9C;
+}
+body {
+    background-color: var(--brown-100);
+    color: #4A3728;
+}
+.navbar {
+    background-color: var(--brown-500);
+}
+.hero {
+    background-image: url('../images/hero_section.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+.card {
+    background-color: white;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.btn-primary {
+    background-color: var(--brown-400);
+    border-color: var(--brown-400);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+.btn-primary:hover {
+    background-color: var(--brown-500);
+    border-color: var(--brown-500);
+    transform: scale(1.1);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+.btn-outline-primary {
+    color: var(--brown-600);
+    border-color: var(--brown-600);
+}
+.btn-outline-primary:hover {
+    background-color: var(--brown-600);
+    color: white;
+}
+
+#aiRecommenderBtn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    animation: pulse 2s infinite;
+    transform-origin: center;
+    border: 3px solid var(--highlight-color);
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), 0 0 10px var(--highlight-color), 0 0 20px var(--highlight-color);
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), 0 0 10px var(--highlight-color), 0 0 20px var(--highlight-color);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3), 0 0 15px var(--highlight-color), 0 0 30px var(--highlight-color);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), 0 0 10px var(--highlight-color), 0 0 20px var(--highlight-color);
+    }
+}
+
+#aiRecommenderBtn i {
+    color: white;
+    font-size: 1.5rem;
+    transition: transform 0.2s ease;
+}
+#aiRecommenderBtn:hover i {
+    transform: rotate(15deg);
+}
+
+.modal-backdrop.show {
+    z-index: 1040;
+}
+#aiRecommenderModal {
+    z-index: 1050;
+}
+#aiRecommendationsModal {
+    z-index: 1060;
+}
+#productDetailsModal {
+    z-index: 1070;
+}
+
+.stock-status {
+    font-weight: bold;
+}
+.in-stock { color: green; }
+.low-stock { color: orange; }
+.out-of-stock { color: red; }
+
+
+
+.hero {
+    background-image: url('static/images/hero_section.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}

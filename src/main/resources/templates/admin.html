@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" media="all" th:href="@{/css/styles.css}" />
+
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">☕ Coffee Haven - Inventory</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/orders">Orders List</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login" >Log Out</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4">Welcome, <span id="ownerName">Owner</span>!</h1>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <input type="text" class="form-control" id="searchInput" placeholder="Search products...">
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="sortSelect">
+                    <option value="">Sort by...</option>
+                    <option value="type">Type</option>
+                    <option value="origin">Origin</option>
+                    <option value="price_asc">Price: Low to High</option>
+                    <option value="price_desc">Price: High to Low</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#addProductModal">Add Product</button>
+            </div>
+        </div>
+
+        <div class="row" id="productContainer">
+            <!-- Products will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addProductForm">
+                        <div class="mb-3">
+                            <label for="productName" class="form-label">Product Name</label>
+                            <input type="text" class="form-control" id="productName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="productDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productPrice" class="form-label">Price</label>
+                            <input type="number" class="form-control" id="productPrice" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productStock" class="form-label">Initial Stock</label>
+                            <input type="number" class="form-control" id="productStock" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productType" class="form-label">Type</label>
+                            <input type="text" class="form-control" id="productType" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productOrigin" class="form-label">Origin</label>
+                            <input type="text" class="form-control" id="productOrigin" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productImage" class="form-label">Image URL</label>
+                            <input type="text" class="form-control" id="productImage" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="addProduct()">Add Product</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Details Modal -->
+    <div class="modal fade" id="productDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productDetailsTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="productDetailsBody">
+                    <!-- Product details will be dynamically inserted here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="updateStock()">Update Stock</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let products = [];
+
+        function fetchProducts() {
+            fetch('/api/products')
+                .then(response => response.json())
+                .then(data => {
+                    products = data;
+                    renderProducts();
+                });
+        }
+
+        function renderProducts() {
+            const productContainer = document.getElementById('productContainer');
+            productContainer.innerHTML = '';
+            products.forEach(product => {
+                const productElement = document.createElement('div');
+                productElement.className = 'col-md-4 mb-4';
+                productElement.innerHTML = `
+                    <div class="card h-100">
+                        <img src="${product.imageUrl}" class="card-img-top" alt="${product.name}">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.name}</h5>
+                            <p class="card-text">$${product.price.toFixed(2)}</p>
+                            <p class="card-text">Stock: ${product.stock}</p>
+                            <button class="btn btn-primary" onclick="showProductDetails(${product.id})">View Details</button>
+                        </div>
+                    </div>
+                `;
+                productContainer.appendChild(productElement);
+            });
+        }
+
+        function addProduct() {
+            const form = document.getElementById('addProductForm');
+            if (form.checkValidity()) {
+                const newProduct = {
+                    name: document.getElementById('productName').value,
+                    description: document.getElementById('productDescription').value,
+                    price: parseFloat(document.getElementById('productPrice').value),
+                    stock: parseInt(document.getElementById('productStock').value),
+                    type: document.getElementById('productType').value,
+                    origin: document.getElementById('productOrigin').value,
+                    imageUrl: document.getElementById('productImage').value
+                };
+
+                fetch('/api/products', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newProduct),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        products.push(data);
+                        renderProducts();
+                        bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+                        form.reset();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to add product. Please try again.');
+                    });
+            } else {
+                form.reportValidity();
+            }
+        }
+
+        function showProductDetails(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                document.getElementById('productDetailsTitle').textContent = product.name;
+                document.getElementById('productDetailsBody').innerHTML = `
+                    <img src="${product.imageUrl}" class="img-fluid mb-3" alt="${product.name}">
+                    <p><strong>Description:</strong> ${product.description}</p>
+                    <p><strong>Price:</strong> $${product.price.toFixed(2)}</p>
+                    <p><strong>Type:</strong> ${product.type}</p>
+                    <p><strong>Origin:</strong> ${product.origin}</p>
+                    <p><strong>Current Stock:</strong> ${product.stock}</p>
+                    <div class="mb-3">
+                        <label for="updateStockInput" class="form-label">Update Stock:</label>
+                        <input type="number" class="form-control" id="updateStockInput" value="${product.stock}">
+                    </div>
+                `;
+                new bootstrap.Modal(document.getElementById('productDetailsModal')).show();
+            } else {
+                console.error('Product not found');
+            }
+        }
+
+        function updateStock() {
+            const productName = document.getElementById('productDetailsTitle').textContent;
+            const newStock = parseInt(document.getElementById('updateStockInput').value);
+            const product = products.find(p => p.name === productName);
+            if (product && !isNaN(newStock) && newStock >= 0) {
+                product.stock = newStock;
+                fetch(`/api/products/${product.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(product),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        renderProducts();
+                        bootstrap.Modal.getInstance(document.getElementById('productDetailsModal')).hide();
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to update stock. Please try again.');
+                    });
+            } else {
+                alert('Invalid stock value. Please enter a non-negative number.');
+            }
+        }
+
+        // Initial fetch
+        fetchProducts();
+    </script>
+</body>
+</html>
