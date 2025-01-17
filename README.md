@@ -11,13 +11,15 @@
 - Order tracking
 - View order history
 
-**Note:** The Shopping Cart and My Orders functionalities for the Customer's view has errors in them currently.
-
 ### Admin Features
 - Inventory management
 - Order status updates
 - Stock monitoring
 - Product catalog maintenance
+
+
+**Note:** The Shopping Cart and My Orders functionalities for the Customer's view has errors in them currently.
+
 
 ## 🛠️ Tech Stack
 
