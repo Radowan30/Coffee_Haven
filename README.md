@@ -9,7 +9,9 @@
 - AI-powered coffee recommendations
 - Shopping cart management
 - Order tracking
-- View purchase history
+- View order history
+
+**Note:** The Shopping Cart and My Orders functionalities for the Customer's view has errors in them currently.
 
 ### Admin Features
 - Inventory management
