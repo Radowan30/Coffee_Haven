@@ -18,7 +18,7 @@
 - Product catalog maintenance
 
 
-**Note:** The Shopping Cart, My Orders functionalities for the Customer's sub-system, and image rendering for the Admin's sub-system has errors in them currently.
+**Note:** The Shopping Cart and My Orders functionalities for the Customer's sub-system, and image rendering for the Admin's sub-system has errors in them currently.
 
 
 ## 🛠️ Tech Stack
