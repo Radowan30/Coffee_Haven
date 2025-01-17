@@ -58,8 +58,8 @@ Make a MySQL database called 'coffeehavenDB'. In the 'application.properties' fi
 ```bash
 # src/main/resources/application.properties
 spring.datasource.url=jdbc:mysql://localhost:3306/coffeehavenDB
-spring.datasource.username=root
-spring.datasource.password=password
+spring.datasource.username=your-username
+spring.datasource.password=your-password
 ```
 
 3. Set environment variables
