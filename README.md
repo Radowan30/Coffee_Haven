@@ -25,7 +25,7 @@
 
 ### Backend
 - Java 17
-- Spring Boot 3.4.1
+- Spring Boot 
 - Spring Security
 - Spring Data JPA 
 - MySQL Database
